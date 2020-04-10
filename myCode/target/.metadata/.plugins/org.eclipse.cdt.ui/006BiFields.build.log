@@ -1,0 +1,10 @@
+17:54:04 **** Incremental Build of configuration Debug for project 006BiFields ****
+make -j8 all 
+arm-none-eabi-size   006BiFields.elf 
+   text	   data	    bss	    dec	    hex	filename
+    816	      8	   1568	   2392	    958	006BiFields.elf
+Finished building: default.size.stdout
+ 
+
+17:54:04 Build Finished. 0 errors, 0 warnings. (took 375ms)
+

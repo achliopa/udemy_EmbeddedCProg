@@ -1,0 +1,4 @@
+22:09:07 **** Rebuild of configuration Debug for project 001Average ****
+Info: Internal Builder is used for build
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o main.o "..\\main.c" 
+gcc -o 001Average.exe main.o 

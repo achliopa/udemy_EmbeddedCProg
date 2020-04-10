@@ -1,0 +1,7 @@
+03:13:04 **** Clean-only build of configuration Debug for project 001HelloWorld ****
+make -j8 clean 
+rm -rf *
+ 
+
+03:13:04 Build Finished. 0 errors, 0 warnings. (took 293ms)
+
