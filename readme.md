@@ -1191,4 +1191,171 @@ union Packet
 
 ## Section 29: Arrays
 
-* 
+* an array in C is a collection of data of the same datatype;
+* definition (mem allocation) `uint8_t studentsAge[100];`
+	* `studentsAge` is a base pointer or a reference to 100 data itemsof type uint8_t
+	* data type of studentAge is uint8_t* NOT uint8_t
+	* data type of stored items is uint8_t
+* size of an array
+	* total memory consumed by this array in memory = number of data itemx * size of single data item = 100 * 1 => 100bytes. we can ge the size of an array in bytes `sizeof(studentsAge)=100`
+* data items in an array are stored in contiguous memory locations `printf("%p",studentsAge);` prints the base address of an array
+* array initializations
+	* `uint8_t someData[10] = {0xff,0xff,0xff};` if i partially initialize an array the remaining vals will be initialized to 0
+	* if we initialize an array without pecifying its size the size is equal to the data items passed in the literal passed `uitn8_t someData[]={0xFF,0xFF,0xFF};` results in a 3 elements array
+	* `uint8_t someData[];`
+	* using a var to initialize the size of an array is accepted by -pedantic rule in compiler forbids it
+* read/write in an array
+	* write a value using pointers (eg in second position) `*(someData_1) = 0xDD;`
+	* easier way to write in array data item `someData[1]=0xDD;`
+* the reason C uses 0 indexing in arrays is the ways it references data using pointers
+* passing array to a function? pass the reference AND the numer of elements (sizeof wont cut it as we dont know item size) `array_display(someData,nItems);`
+* the function prototype will be `void array_display(uint8_t *pArray,uint32_t nItems);`
+* if we dont know size divide sizof array with sizeof datatype
+
+## Section 30: Strings
+
+* a string is nothing but a collection (array) of characters terminated by a null character \0 or 0x00
+* a null character is used to indcate end of string 
+* we can use an array to store strings
+* unlike C++,Java,Python C doe not have a dedicated datatype for strings
+* in C we treat the string as an array to store and manipulate its data.
+* `char msg[] = "Hello";` msg is a reference or pointer to the string first char
+* to initialize a string
+	* `char msg[]="hello";`
+	* `char msg[]={'h','e','l','l','o','\0'};` array style DONT use  this as its easy to forget the Null termnation
+	* we can do partial initialization like array `chat msg[10]="hello";`
+* `strlen(msg)` returns the length of the string of useful data NOT counting the NULL char. so in this example is 5, sizeof(msg) returns all reserved mem treating it as an array (counta also the nulls)
+* `char *msg1 = "hello";` is a valid way to initialize a string. in this case mem allocation is done by the compiler by looking at the string literal passed. there is a BIG difference though
+	* `char *msg1 = "hello";` mem allocation is done in ROM Cannot be modified. this is a string literal
+	* `char msg2[] = "hello";` mem allocation is done in RAM
+* RAM is divided in areas
+	* gobal_data
+	* stack (local vars, transient data),stack is monitored by the stac pointer register
+	* heap (dynamic memory allocation)
+* a string initialized in a function is copied from flash at runtime to stack
+* modifications at a local variable string happen in stack
+* in a string literal the reference is stored in stack (RAM) but it points to the FLASH where data are stored 
+* a more proper way for a string literal is `char const *pmsg ="HELLO";` so that it wont crash at runtime braking the app but in compilation time
+* when we input a string with scanf() and %s
+```
+char name[30];
+printf("Enter your name");
+scanf("%s",name);
+printf("Hi, %s!",name);
+```
+* this code tkae sonly words.. it brakes at sentences
+* to input a string with spaces between use `scanf("%d%d%d",&a,&b,&c);` or `scanf("%s%s",str1,str2)`it ignores blank space
+* another trick is scansets. we pass them in the formater they work regex style filtering what passes in the input buffer 
+	* scanf("%[^s]s",name); pass in any char till you see an s 
+	* scanf("%[A-Z]s",name); pass in only capital letters
+* Exercise:
+* write a prog to maintain records of students. the program must maintain records of 10 students and we should give below features to our program
+	* display all records
+	* add a new record
+	* delete a record
+	The program also should avoid/alert about the new situations
+	a. duplication of a record
+	b. no space to add a new record
+	c. delting an unknown record
+* Hints:
+	* use a structure to maintain a student record
+	* student record should contain
+```
+typedef struct {
+	int rollNumber;
+	char name[50];
+	char branch[50];
+	char dob[15];
+	int semester;
+}STUDENT_INFO_T;
+```
+	* reserve space for 10 student records
+	* use a global array of struct `STUDENT_INFO_T students[10];`
+* Adding a record
+	* first find out the empty element in an array
+	* whether a node in an array is empty or not is decided by rollNumber field
+	* if roll number is zero, consider that node is empty and a new record can be added
+	* also the user given roll number should not match with other existing roll numbers otherwise it will be considered a duplication and record should not be added
+* Delete a record
+	* ask the user to enter the roll number of the student
+	* match the user entered user roll with the existing roll nums of the noeds
+	* if a match found, then zero out all the member elements of the node(delting means zeroing all the member element of a node)
+
+## Section 31: Pre-Processor directives in 'C'
+
+* in C programming pre-processor directives are used to affect compile time settings
+* preprocessor directives are also used to create macros used as a textual replacement for numbers and other things
+* pre-processor directives begin with #
+* pre-processor directives are resolved or taken cared of during pre-processing stage of compilation
+	* macros: `#define <identidier> <value>` used for textual replacement
+	* file inclusion: `#include <std lib file name>` `#include "user defined file name"` used for file inclusion
+	* conditional compilation: `#ifdef` `#endif`,`#if`,`#else`,`#ifndef`,`#undef` used to direct the compiler about code compilation
+	* others `#error`,`#pragma`
+* Macros are commonly used to define constants `#define MAX_RECORD 10`
+	* this is not a var is textual replacement
+	* in embedded C macros are heavily used for addressed or regs
+* Function like macros: to define a function like macro use the `#define` directive  but put a pair of () immediately after the macro name `#define AREA_OF_CIRCLE(r) PI_VALUE * r * r` this is a poorly writen macro.
+	* we have to be careful with macro values when we do some operation using multiple operands. if programmer passes `area = AREA_OF_CIRCLE(1+1);` its replaced by `area=Pi_VALUE*1+1*1+1` operamd ierarchy meeses things up
+	* by generous on parentesis on fuanctional macro to enforce rules
+* Best practices while writing Macros in C
+	* use meaningful macro names
+	* ita recommended to use UPPER letters for macro names to distinguish them from vars
+	* remember macro names are not vars. are label or identifiers and they dont consume any code space or RAM space during compile or run time
+	* make sure to surround macro val with parenthesis
+	* while using function-like macros or when using macros alnong with operators. always surround operands with parenthesis
+	* `#undef` undefines a macro
+* Conditional compilation directives helps us include or exclude code blocks based on conditions set in the program
+* `#if` and `#endif` 
+	* syntax
+```
+#if <constant expresion>
+// codeblock
+#endif
+```
+	* if the constant expression is zero it skips the blocl..
+	* #endif marks the end of scope
+	* constant is checked at preprocessing (not a var)
+* `#if` `#else` `#endif`
+	* syntax
+```
+#if <constant expresion>
+// codeblock
+#else
+// codeblock
+#endif
+```
+* `#ifdef`
+	* system
+```
+#ifdef <identifier>
+// code block
+#endif
+```
+	* if the identifier is defined the codeblock is compiled
+* defined is done just with define `#define DEFINED` and definition is removed `#undef DEFINED`
+* defined operator is used when we want to check definitions of multiple macros using single `#if`,`#ifdef`,`#ifndef`
+* we can use logical operator such as AND,NOT,OR
+```
+#ifdef CIRCLE
+	#ifdef TRIANGLE
+		//codeblock
+	#endif
+#endif
+```
+* is equal to
+```
+#if defined(CIRCLE) && defined(TRIANGLE)
+	//codeblock
+#endif
+```
+* compile should fail if something that should be defined is not 
+```
+#if !defined(CIRCLE) && !defined(TRIANGLE)
+	#error "Error MSG"
+#endif
+```
+* register mem=mapped with macro 
+```
+#define ADD_REG_AHB1ENR ((RCC_AHB1ENR_t*) 0x40023830)
+RCC_AHB1ENR_t volatile *const pClkCtrlReg = ADD_REG_AHB1ENR;
+```
